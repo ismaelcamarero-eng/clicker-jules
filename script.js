@@ -1,5 +1,26 @@
 const COOKIE_NAME = 'cookie_clicks';
 
+const ACHIEVEMENTS = [
+  {
+    id: 'trophy-10',
+    threshold: 10,
+    name: 'Bronze Trophy',
+    icon: '🥉'
+  },
+  {
+    id: 'trophy-100',
+    threshold: 100,
+    name: 'Silver Trophy',
+    icon: '🥈'
+  },
+  {
+    id: 'trophy-1000',
+    threshold: 1000,
+    name: 'Gold Trophy',
+    icon: '🥇'
+  }
+];
+
 function getCookie(name) {
   const matches = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
   return matches ? decodeURIComponent(matches[1]) : undefined;
@@ -28,11 +49,56 @@ const counterEl = document.getElementById('counter');
 const cookieBtn = document.getElementById('cookie');
 const cookieWrapper = document.getElementById('cookie-wrapper');
 const resetBtn = document.getElementById('reset');
+const toastEl = document.getElementById('achievement-toast');
+const toastTitleEl = document.getElementById('achievement-toast-title');
+
+let toastTimeout = null;
+
+function showAchievementToast(achievement) {
+  if (!toastEl || !toastTitleEl) return;
+  toastTitleEl.textContent = `${achievement.name} (${achievement.threshold} clicks)`;
+  toastEl.classList.add('show');
+
+  if (toastTimeout) {
+    clearTimeout(toastTimeout);
+  }
+
+  toastTimeout = setTimeout(() => {
+    toastEl.classList.remove('show');
+  }, 3000);
+}
+
+function checkAchievements(prevCount, newCount) {
+  ACHIEVEMENTS.forEach((achievement) => {
+    const card = document.getElementById(achievement.id);
+    if (!card) return;
+
+    const statusEl = card.querySelector('.trophy-status');
+    const isUnlocked = newCount >= achievement.threshold;
+
+    if (isUnlocked) {
+      card.classList.remove('locked');
+      card.classList.add('unlocked');
+      if (statusEl) statusEl.textContent = 'Unlocked';
+
+      // Check if newly unlocked during this click transition
+      if (prevCount < achievement.threshold && newCount >= achievement.threshold) {
+        showAchievementToast(achievement);
+      }
+    } else {
+      card.classList.remove('unlocked');
+      card.classList.add('locked');
+      if (statusEl) statusEl.textContent = 'Locked';
+    }
+  });
+}
 
 function updateCounter(newVal) {
+  const prevCount = count;
   count = newVal;
   counterEl.textContent = count;
   setCookie(COOKIE_NAME, count);
+  checkAchievements(prevCount, count);
 }
 
 function createClickEffect(x, y) {
@@ -56,8 +122,9 @@ function createClickEffect(x, y) {
   });
 }
 
-// Initialize display with loaded count
+// Initialize display and achievements with loaded count
 counterEl.textContent = count;
+checkAchievements(0, count);
 
 cookieBtn.addEventListener('click', (event) => {
   updateCounter(count + 1);
