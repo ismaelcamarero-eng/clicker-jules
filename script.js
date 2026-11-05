@@ -1,4 +1,17 @@
 const COOKIE_NAME = 'cookie_clicks';
+const COOKIE_HASH = 'cookie_clicks_hash';
+
+// Simple client-side hash / checksum to deter casual tampering with cookie values
+function simpleHash(val) {
+  let hash = 0;
+  const str = String(val) + '_salt_cookie_clicker_secure_';
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0;
+  }
+  return String(hash);
+}
 
 const ACHIEVEMENTS = [
   {
@@ -30,14 +43,17 @@ function setCookie(name, value, days = 365) {
   const date = new Date();
   date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
   const expires = "; expires=" + date.toUTCString();
-  document.cookie = `${name}=${encodeURIComponent(value || 0)}${expires}; path=/; SameSite=Lax`;
+  document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Lax`;
 }
 
 function loadInitialCount() {
   const saved = getCookie(COOKIE_NAME);
+  const hash = getCookie(COOKIE_HASH);
+
   if (saved !== undefined) {
     const parsed = parseInt(saved, 10);
-    if (!isNaN(parsed) && parsed >= 0) {
+    // Validate value and checksum
+    if (!isNaN(parsed) && parsed >= 0 && hash === simpleHash(parsed)) {
       return parsed;
     }
   }
@@ -98,9 +114,10 @@ function updateCounter(newVal) {
   count = newVal;
   counterEl.textContent = count;
   setCookie(COOKIE_NAME, count);
-  checkAchievements(prevCount, count);
-}
-
+  
+checkAchievements(prevCount, count);
+    setCookie(COOKIE_HASH, simpleHash(count));
+  
 function createClickEffect(x, y) {
   const text = document.createElement('span');
   text.className = 'floating-text';
@@ -122,8 +139,8 @@ function createClickEffect(x, y) {
   });
 }
 
-// Initialize display and achievements with loaded count
-counterEl.textContent = count;
+// Initialize display with loaded count and ensure hash cookie is valid
+updateCounter(count);
 checkAchievements(0, count);
 
 cookieBtn.addEventListener('click', (event) => {
@@ -133,4 +150,31 @@ cookieBtn.addEventListener('click', (event) => {
 
 resetBtn.addEventListener('click', () => {
   updateCounter(0);
+});
+
+// Client-side deterrence against casual inspection / developer tools opening
+// 1. Disable context menu (right click)
+document.addEventListener('contextmenu', (event) => {
+  event.preventDefault();
+});
+
+// 2. Disable F12 and common DevTools shortcuts (Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U)
+document.addEventListener('keydown', (event) => {
+  // F12
+  if (event.key === 'F12' || event.keyCode === 123) {
+    event.preventDefault();
+    return false;
+  }
+
+  // Ctrl+Shift+I / Cmd+Option+I (Inspect), Ctrl+Shift+J / Cmd+Option+J (Console), Ctrl+Shift+C (Element picker)
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && (['I', 'i', 'J', 'j', 'C', 'c'].includes(event.key) || [73, 74, 67].includes(event.keyCode))) {
+    event.preventDefault();
+    return false;
+  }
+
+  // Ctrl+U / Cmd+Option+U (View Source)
+  if ((event.ctrlKey || event.metaKey) && (event.key === 'u' || event.key === 'U' || event.keyCode === 85)) {
+    event.preventDefault();
+    return false;
+  }
 });
