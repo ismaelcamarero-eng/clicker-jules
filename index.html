@@ -177,48 +177,6 @@
     <button id="reset" class="reset-btn" title="Reset counter">Reset Counter</button>
   </div>
 
-  <script>
-    let count = 0;
-    const counterEl = document.getElementById('counter');
-    const cookieBtn = document.getElementById('cookie');
-    const cookieWrapper = document.getElementById('cookie-wrapper');
-    const resetBtn = document.getElementById('reset');
-
-    function updateCounter(newVal) {
-      count = newVal;
-      counterEl.textContent = count;
-    }
-
-    function createClickEffect(x, y) {
-      const text = document.createElement('span');
-      text.className = 'floating-text';
-      text.textContent = '+1';
-
-      // Position relative to wrapper if coordinates provided, else center
-      if (x !== undefined && y !== undefined) {
-        const rect = cookieWrapper.getBoundingClientRect();
-        text.style.left = `${x - rect.left}px`;
-        text.style.top = `${y - rect.top}px`;
-      } else {
-        text.style.left = '50%';
-        text.style.top = '40%';
-      }
-
-      cookieWrapper.appendChild(text);
-
-      text.addEventListener('animationend', () => {
-        text.remove();
-      });
-    }
-
-    cookieBtn.addEventListener('click', (event) => {
-      updateCounter(count + 1);
-      createClickEffect(event.clientX, event.clientY);
-    });
-
-    resetBtn.addEventListener('click', () => {
-      updateCounter(0);
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
