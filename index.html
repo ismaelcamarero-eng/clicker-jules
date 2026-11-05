@@ -13,6 +13,8 @@
       --cookie-base: #d4a373;
       --cookie-edge: #b5835a;
       --chip-color: #58311b;
+      --locked-color: #a89f91;
+      --locked-bg: #eae3d9;
     }
 
     * {
@@ -31,7 +33,9 @@
       color: var(--text-color);
       user-select: none;
       -webkit-user-select: none;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 1.5rem 1rem;
     }
 
     .container {
@@ -39,9 +43,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
-      padding: 2rem;
+      gap: 1.25rem;
+      padding: 1.5rem;
       position: relative;
+      max-width: 540px;
+      width: 100%;
     }
 
     h1 {
@@ -51,7 +57,7 @@
     }
 
     .counter-display {
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       font-weight: 600;
       color: var(--text-color);
       background: rgba(255, 255, 255, 0.7);
@@ -62,7 +68,7 @@
     }
 
     .counter-value {
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 800;
       color: var(--accent-color);
     }
@@ -139,11 +145,11 @@
     }
 
     .reset-btn {
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
       background: none;
       border: 1px solid rgba(88, 49, 27, 0.2);
       color: var(--text-color);
-      padding: 0.4rem 1rem;
+      padding: 0.45rem 1.1rem;
       border-radius: 6px;
       font-size: 0.85rem;
       cursor: pointer;
@@ -153,9 +159,189 @@
     .reset-btn:hover {
       background: rgba(88, 49, 27, 0.08);
     }
+
+    /* Achievements Section */
+    .achievements-section {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 16px rgba(88, 49, 27, 0.08);
+      backdrop-filter: blur(8px);
+      margin-top: 0.5rem;
+    }
+
+    .achievements-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .trophies-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .trophy-card {
+      background: #fdfbf7;
+      border: 2px solid #ecd8c6;
+      border-radius: 12px;
+      padding: 0.85rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    .trophy-card.locked {
+      opacity: 0.6;
+      border-color: #e2ddd6;
+      background: var(--locked-bg);
+      filter: grayscale(85%);
+    }
+
+    .trophy-card.unlocked {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(196, 124, 62, 0.2);
+    }
+
+    .trophy-card[data-threshold="10"].unlocked {
+      border-color: #cd7f32;
+      background: linear-gradient(180deg, #fff9f2 0%, #f7e6d5 100%);
+    }
+
+    .trophy-card[data-threshold="100"].unlocked {
+      border-color: #a8b2bc;
+      background: linear-gradient(180deg, #ffffff 0%, #e9edf1 100%);
+    }
+
+    .trophy-card[data-threshold="1000"].unlocked {
+      border-color: #f1b722;
+      background: linear-gradient(180deg, #fffdf2 0%, #fef3c7 100%);
+    }
+
+    .trophy-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.3rem;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .trophy-card.unlocked .trophy-icon {
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .trophy-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 0.2rem;
+    }
+
+    .trophy-desc {
+      font-size: 0.72rem;
+      color: #7d6857;
+      margin-bottom: 0.4rem;
+    }
+
+    .trophy-status {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.18rem 0.55rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .trophy-card.locked .trophy-status {
+      background: #dad5cd;
+      color: #6d675e;
+    }
+
+    .trophy-card.unlocked .trophy-status {
+      background: #3b8a3e;
+      color: #ffffff;
+    }
+
+    /* Achievement notification toast */
+    .achievement-toast {
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #2e261f;
+      color: #ffffff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    }
+
+    .achievement-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .achievement-toast-icon {
+      font-size: 1.5rem;
+    }
+
+    .achievement-toast-content {
+      text-align: left;
+    }
+
+    .achievement-toast-header {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.75px;
+      color: #f6c56d;
+      font-weight: 700;
+    }
+
+    .achievement-toast-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 480px) {
+      .trophies-grid {
+        grid-template-columns: 1fr;
+      }
+      .trophy-card {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+      }
+      .trophy-info {
+        text-align: left;
+        margin-left: 0.75rem;
+        flex-grow: 1;
+      }
+    }
   </style>
 </head>
 <body>
+  <div id="achievement-toast" class="achievement-toast" role="alert" aria-live="assertive">
+    <span class="achievement-toast-icon">🏆</span>
+    <div class="achievement-toast-content">
+      <div class="achievement-toast-header">Trophy Unlocked!</div>
+      <div id="achievement-toast-title" class="achievement-toast-title">Achievement Name</div>
+    </div>
+  </div>
+
   <div class="container">
     <h1>Cookie Clicker</h1>
     <div class="counter-display" aria-live="polite">
@@ -175,6 +361,41 @@
     </div>
 
     <button id="reset" class="reset-btn" title="Reset counter">Reset Counter</button>
+
+    <section class="achievements-section" aria-label="Achievements">
+      <h2 class="achievements-title">🏆 Trophies</h2>
+      <div class="trophies-grid" id="trophies-container">
+        <!-- 10 Clicks: Bronze Trophy -->
+        <div class="trophy-card locked" id="trophy-10" data-threshold="10">
+          <span class="trophy-icon" aria-hidden="true">🥉</span>
+          <div class="trophy-info">
+            <div class="trophy-name">Bronze Trophy</div>
+            <div class="trophy-desc">Reach 10 clicks</div>
+          </div>
+          <span class="trophy-status">Locked</span>
+        </div>
+
+        <!-- 100 Clicks: Silver Trophy -->
+        <div class="trophy-card locked" id="trophy-100" data-threshold="100">
+          <span class="trophy-icon" aria-hidden="true">🥈</span>
+          <div class="trophy-info">
+            <div class="trophy-name">Silver Trophy</div>
+            <div class="trophy-desc">Reach 100 clicks</div>
+          </div>
+          <span class="trophy-status">Locked</span>
+        </div>
+
+        <!-- 1000 Clicks: Gold Trophy -->
+        <div class="trophy-card locked" id="trophy-1000" data-threshold="1000">
+          <span class="trophy-icon" aria-hidden="true">🥇</span>
+          <div class="trophy-info">
+            <div class="trophy-name">Gold Trophy</div>
+            <div class="trophy-desc">Reach 1000 clicks</div>
+          </div>
+          <span class="trophy-status">Locked</span>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script src="script.js"></script>
